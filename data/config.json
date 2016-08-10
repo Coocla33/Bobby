@@ -1,0 +1,13 @@
+{
+	"login": {
+		"token": "",
+		"botid": "",
+		"appid": ""
+	},
+	"misc": {
+		"prefix": "."
+	},
+	"acces": {
+		"master": 
+	}
+}

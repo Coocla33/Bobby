@@ -1,0 +1,19 @@
+{
+  "name": "bobby",
+  "version": "0.4.0",
+  "description": "A simple Discord bot!",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Coocla33/Bobby.git"
+  },
+  "author": "Misha Bruinsma",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Coocla33/Bobby/issues"
+  },
+  "homepage": "https://github.com/Coocla33/Bobby#readme"
+}
