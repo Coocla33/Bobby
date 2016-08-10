@@ -1,7 +1,7 @@
 # Bobby V0.4
 This is **Bobby**,
 **Bobby** is a Discord bot that i am working on.
-
+The prefix of **Bobby** is **.**
 
 # Commands
 - Main Commands
