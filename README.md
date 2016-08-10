@@ -36,7 +36,7 @@ To setup **Bobby** you need to put in the right information at the **config.json
 		"prefix": "custom_prefix"
 	},
 	"acces": {
-		"master": master_user_id
+		"master": "master_user_id"
 	}
 }
 ```
