@@ -3,7 +3,7 @@ This is **Bobby**,
 **Bobby** is a Discord bot that i am working on.
 The prefix of **Bobby** is **.**
 
-# Commands
+## Commands
 - Main Commands
   - BotInfo
   - Calc
@@ -22,7 +22,7 @@ The prefix of **Bobby** is **.**
   - Template
   - ZelakUpdate
 
-# Basic Config.json setup
+## Basic Config.json setup
 To setup **Bobby** you need to put in the right information at the **config.json** file located inside the **data** folder. Here is a example on how to set it up.
 ```json
 
