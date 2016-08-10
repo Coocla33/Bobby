@@ -21,3 +21,22 @@ The prefix of **Bobby** is **.**
   - ServerList
   - Template
   - ZelakUpdate
+
+# Basic Config.json setup
+To setup **Bobby** you need to put in the right information at the **config.json** file located inside the **data** folder. Here is a example on how to set it up.
+```json
+
+{
+	"login": {
+		"token": "bot_token",
+		"botid": "bot_id",
+		"appid": "application_id"
+	},
+	"misc": {
+		"prefix": "custom_prefix"
+	},
+	"acces": {
+		"master": master_user_id
+	}
+}
+```
