@@ -21,6 +21,7 @@ var cmds = {
 		'usage': '<>',
 		'master': true,
 		'admin': false,
+		'cooldown': 3000,
 		fn: function(bot, msg, suffix) {
 			bot.sendMessage(msg, 'Template')
 		}
@@ -31,6 +32,7 @@ var cmds = {
 		'usage': '<master>',
 		'master': true,
 		'admin': false,
+		'cooldown': 3000,
 		fn: function(bot, msg, suffix) {
 			bot.sendMessage(msg, 'You are a master!')
 		}
@@ -41,6 +43,7 @@ var cmds = {
 		'usage': '<commands>',
 		'master': false,
 		'admin': false,
+		'cooldown': 3000,
 		fn: function(bot, msg, suffix) {
 			messageArray = []
 			messageArray.push('These are all the commands:')
@@ -68,6 +71,7 @@ var cmds = {
 		'usage': '<help [command_name]>',
 		'master': false,
 		'admin': false,
+		'cooldown': 3000,
 		fn: function(bot, msg, suffix) {
 			if (suffix) {
 				if (getCommandsHelp(suffix)) {
@@ -88,6 +92,7 @@ var cmds = {
 		'usage': '<info>',
 		'master': false,
 		'admin': false,
+		'cooldown': 3000,
 		fn: function(bot, msg, suffix) {
 			var messageArray = []
 			messageArray.push('Hi, my name is Bobby! I heard you wanted some info about me!')
@@ -102,6 +107,7 @@ var cmds = {
 		'usage': '<botinfo>',
 		'master': false,
 		'admin': false,
+		'cooldown': 3000,
 		fn: function(bot, msg, suffix) {
 			var uptime = time(bot.uptime / 1000)
 			messageArray = []
@@ -118,6 +124,7 @@ var cmds = {
 		'usage': '<tag [create, list, info, tag_name] [tag_name] [tag_content]>',
 		'master': false,
 		'admin': false,
+		'cooldown': 3000,
 		fn: function(bot, msg, suffix) {
 			var messageArray = []
 			var args1 = suffix.toLowerCase().split(' ')[0]
@@ -233,8 +240,9 @@ var cmds = {
 		'usage': '<serverlist>',
 		'master': true,
 		'admin': false,
+		'cooldown': 3000,
 		fn: function(bot, msg, suffix) {
-			bot.sendMessage(msg, '**(' + bot.servers.length + ')** | **' + bot.servers.map(server => server.name).join('**, **') + '**')
+			bot.sendMessage(msg, '`(' + bot.servers.length + ')` | `' + bot.servers.map(server => server.name).join('`, `') + '`')
 		}
 	},
 	calc: {
@@ -243,6 +251,7 @@ var cmds = {
 		'usage': '<calc [formula]>',
 		'master': false,
 		'admin': false,
+		'cooldown': 10000,
 		fn: function(bot, msg, suffix) {
 			var messageArray = []
 			if (suffix) {
@@ -278,6 +287,7 @@ var cmds = {
 		'usage': '<userinfo [mention]>',
 		'master': false,
 		'admin': false,
+		'cooldown': 3000,
 		fn: function(bot, msg, suffix) {
 			var messageArray = []
 			if (msg.mentions.length > 0) {
@@ -331,6 +341,7 @@ var cmds = {
 		'usage': '<getinvite [server_name]>',
 		'master': true,
 		'admin': false,
+		'cooldown': 3000,
 		fn: function(bot, msg, suffix) {
 			zelakapi.getServerInvite(suffix, function(err, resp) {
 				if (err) {
@@ -346,6 +357,7 @@ var cmds = {
 		'usage': '<zelak_api>',
 		'master': true,
 		'admin': false,
+		'cooldown': 3000,
 		fn: function(bot, msg, suffix) {
 			zelakapi.sendServersInvite(bot.servers, bot, function(err, status) {
 				if (err) {
@@ -361,6 +373,7 @@ var cmds = {
 		'usage': '<serverinfo>',
 		'master': false,
 		'admin': false,
+		'cooldown': 3000,
 		fn: function(bot, msg, suffix) {
 			var date = function() {
 				var dn = new Date(msg.server.createdAt)
@@ -388,6 +401,7 @@ var cmds = {
 		'usage': '<inrole [role_name]>',
 		'master': false,
 		'admin': true,
+		'cooldown': 3000,
 		fn: function(bot, msg, suffix) {
 			if (suffix) {
 				var name = suffix
@@ -404,6 +418,23 @@ var cmds = {
 			else {
 				bot.sendMessage(msg, 'You should mention a role first! Use the command like this: `' + prefix + 'inrole example role`')
 			}
+		}
+	},
+	cooldown: {
+		'name': 'cooldown',
+		'desc': 'Testing :3',
+		'usage': '<inrole [role_name]>',
+		'master': true,
+		'admin': false,
+		'cooldown': 3000,
+		fn: function(bot, msg, suffix) {
+			var messageArray = []
+			var add_time = function(date, seconds) {
+				return new Date(date.getTime() + seconds * 1000)
+			}
+			messageArray.push(new Date())
+			messageArray.push(user_cooldown(new Date, 10))
+			bot.sendMessage(msg, messageArray)
 		}
 	}
 }
