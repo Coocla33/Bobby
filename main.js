@@ -11,6 +11,8 @@ var prefix = config.misc.prefix
 var server_obj
 var i
 
+var user_cooldown = {}
+
 var log_info = chalk.bold.green('INFO: ')
 var log_warn = chalk.bold.yellow('WARNING: ')
 var log_error = chalk.bold.red('ERROR: ')
@@ -29,7 +31,7 @@ var log = function(cmd_name, user_name, user_id, user_discrim) {
 console.log(log_time() + log_info + 'Starting up Bobby!')
 
 bot.on("ready", () => {
-	bot.setStatus("online", "Bobby | V0.3.4")
+	bot.setStatus("online", "Bobby | V0.5.2")
 
 	var ready = new Date() - startup
 	console.log(log_time() + log_info + 'Servers: ' + bot.servers.length)
@@ -43,10 +45,14 @@ bot.on("serverCreated", function(server) {
 })
 
 bot.on("message", function(msg) {
+	if (msg.content == '.user_cooldown') {
+		bot.sendMessage(msg, JSON.stringify(user_cooldown))
+	}
 	if (msg.content.startsWith(prefix)) {
 		var base = msg.content.substr(prefix.length)
 		var stub = base.split(' ')
 		var name = stub[0]
+		var new_cooldown = 
 		name = name.toLowerCase()
 		var suffix = base.substr(stub[0].length + 1)
 		try {
@@ -55,17 +61,49 @@ bot.on("message", function(msg) {
 					cmd.execute[name].fn(bot, msg, suffix)
 					log(cmd.execute[name].name, msg.author.name, msg.author.id, msg.author.discriminator)
 				}
-				else if (cmd.execute[name].admin == true && msg.author.id == msg.server.owner.id) {
-					cmd.execute[name].fn(bot, msg, suffix)
-					log(cmd.execute[name].name, msg.author.name, msg.author.id, msg.author.discriminator)
+				else if (cmd.execute[name].admin == true) {
+					if (msg.server.roles.get('name', 'bobby commander')) {
+						if (msg.author.id == msg.server.owner.id || bot.memberHasRole(msg.author.id, msg.server.roles.get('name', 'bobby commander'))) {
+							cmd.execute[name].fn(bot, msg, suffix)
+							log(cmd.execute[name].name, msg.author.name, msg.author.id, msg.author.discriminator)
+						}
+						else {
+							bot.sendMessage(msg, 'I am sorry, but you dont have acces to this command!')
+							console.log(log_time() + log_warn + '[' + msg.author.name + '#' + msg.author.discriminator + ' | ' + msg.author.id + '] tried to use the ADMIN command: <' + cmd.execute[name].name + '>')
+						}
+					}
+					else {
+						bot.sendMessage(msg, 'I am sorry but if you want to be able to use this command there should be a role in the server called: `bobby controller` (CASE SENSITIVE!)')
+					}
 				}
 				else if (cmd.execute[name].admin == false && cmd.execute[name].master == false) {
-					cmd.execute[name].fn(bot, msg, suffix)
-					log(cmd.execute[name].name, msg.author.name, msg.author.id, msg.author.discriminator)
+					if (user_cooldown[msg.author.id]) {
+						if (user_cooldown[msg.author.id][name]) {
+							if (user_cooldown[msg.author.id][name].cooldown < new Date()) {
+								cmd.execute[name].fn(bot, msg, suffix)
+								log(cmd.execute[name].name, msg.author.name, msg.author.id, msg.author.discriminator)
+								cooldown(new Date(), msg.author, cmd.execute[name].cooldown, name)
+							}
+							else {
+								var wait_sec = (user_cooldown[msg.author.id][name].cooldown - new Date()) / 1000
+								bot.sendMessage(msg, 'Oh ooh! It seems like you are trying to use commands to fast! You need to wait another `' + wait_sec + '` seconds!')
+							}
+						}
+						else {
+							cmd.execute[name].fn(bot, msg, suffix)
+							log(cmd.execute[name].name, msg.author.name, msg.author.id, msg.author.discriminator)
+							cooldown(new Date(), msg.author, cmd.execute[name].cooldown, name)
+						}
+					}
+					else {
+						cmd.execute[name].fn(bot, msg, suffix)
+						log(cmd.execute[name].name, msg.author.name, msg.author.id, msg.author.discriminator)
+						cooldown(new Date(), msg.author, cmd.execute[name].cooldown, name)
+					}
 				}
 				else {
 					bot.sendMessage(msg, 'I am sorry, but you dont have acces to this command!')
-					console.log(log_time() + log_warn + '[' + msg.author.name + '#' + msg.author.discriminator + ' | ' + msg.author.id + '] tried to use the MASTER/ADMIN command: <' + cmd.execute[name].name + '>')
+					console.log(log_time() + log_warn + '[' + msg.author.name + '#' + msg.author.discriminator + ' | ' + msg.author.id + '] tried to use the MASTER command: <' + cmd.execute[name].name + '>')
 				}
 			}
 		}
@@ -75,5 +113,25 @@ bot.on("message", function(msg) {
 		}
 	}
 })	
+
+var add_time = function(date, seconds) {
+	return new Date(date.getTime() + seconds * 1000)
+}
+
+var cooldown = function(date, user, time, command_name) {
+	var new_cooldown = new Date(date.getTime() + time)
+	var user_id = user.id
+	if (user_cooldown[user.id]) {
+		if (user_cooldown[user.id][command_name]) {
+			user_cooldown[user.id][command_name].cooldown = new_cooldown
+		}
+		else {
+			user_cooldown[user.id][command_name] = {'cooldown': new_cooldown}
+		}
+	}
+	else {
+		user_cooldown[user.id] = {[command_name]: {'cooldown': new_cooldown}}
+	}
+}
 
 bot.loginWithToken(config.login.token)
