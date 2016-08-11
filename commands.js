@@ -419,23 +419,6 @@ var cmds = {
 				bot.sendMessage(msg, 'You should mention a role first! Use the command like this: `' + prefix + 'inrole example role`')
 			}
 		}
-	},
-	cooldown: {
-		'name': 'cooldown',
-		'desc': 'Testing :3',
-		'usage': '<inrole [role_name]>',
-		'master': true,
-		'admin': false,
-		'cooldown': 3000,
-		fn: function(bot, msg, suffix) {
-			var messageArray = []
-			var add_time = function(date, seconds) {
-				return new Date(date.getTime() + seconds * 1000)
-			}
-			messageArray.push(new Date())
-			messageArray.push(user_cooldown(new Date, 10))
-			bot.sendMessage(msg, messageArray)
-		}
 	}
 }
 
