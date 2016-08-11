@@ -45,9 +45,6 @@ bot.on("serverCreated", function(server) {
 })
 
 bot.on("message", function(msg) {
-	if (msg.content == '.user_cooldown') {
-		bot.sendMessage(msg, JSON.stringify(user_cooldown))
-	}
 	if (msg.content.startsWith(prefix)) {
 		var base = msg.content.substr(prefix.length)
 		var stub = base.split(' ')
