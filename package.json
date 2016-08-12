@@ -1,6 +1,6 @@
 {
   "name": "bobby",
-  "version": "0.5.2",
+  "version": "0.6.1",
   "description": "A simple Discord bot!",
   "main": "main.js",
   "scripts": {
