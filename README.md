@@ -27,7 +27,6 @@ The prefix of **Bobby** is **.**
 
 ## Basic Config.json setup
 To setup **Bobby** you need to put in the right information at the **config.json** file located inside the **data** folder. Here is a example on how to set it up.
-_NOTE: You an only have **1** master_user!_
 ```json
 
 {
@@ -44,3 +43,5 @@ _NOTE: You an only have **1** master_user!_
 	}
 }
 ```
+
+_NOTE: You can only use **1** master_user_id! More will break the bot!_
