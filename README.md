@@ -13,17 +13,22 @@ The prefix of **Bobby** is **.**
   - ServerInfo
   - Tag
   - UserInfo
+  - Blacklist
 - Admin Commands
   - InRole
-- Master Commands (Only available to @Coocla33)
+- Master Commands (Only available to the Master user!)
   - GetInvite
   - Master
   - ServerList
   - Template
   - ZelakUpdate
+  - BlacklistAdd
+  - BlacklistRemove
 
 ## Basic Config.json setup
 To setup **Bobby** you need to put in the right information at the **config.json** file located inside the **data** folder. Here is a example on how to set it up.
+
+> You an only have **1** master_user!
 ```json
 
 {
