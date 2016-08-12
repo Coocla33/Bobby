@@ -3,6 +3,7 @@ var chalk = require('chalk')
 
 var cmd = require('./commands.js')
 var config = require('./data/config.json')
+var blacklist = require('./data/blacklist.json')
 
 var bot = new Discord.Client()
 
@@ -31,7 +32,7 @@ var log = function(cmd_name, user_name, user_id, user_discrim) {
 console.log(log_time() + log_info + 'Starting up Bobby!')
 
 bot.on("ready", () => {
-	bot.setStatus("online", "Bobby | V0.5.2")
+	bot.setStatus("online", "Bobby | V0.6.1")
 
 	var ready = new Date() - startup
 	console.log(log_time() + log_info + 'Servers: ' + bot.servers.length)
@@ -40,11 +41,14 @@ bot.on("ready", () => {
 })
 
 bot.on("serverCreated", function(server) {
-	bot.sendMessage(server.defaultChannel, 'Hi! I am Bobby! I am here to serve you! I can do lots of stuff! Just type `' + prefix + 'help` and i will show you what i can do!')
+	bot.sendMessage(server.defaultChannel, 'Hi! I am Bobby! I am here to serve you! I can do lots of stuff! Just type `' + prefix + 'commands` and i will show you what i can do!')
 	console.log(log_time() + log_info + 'Joined a server with the name: <' + server.name + '>')
 })
 
 bot.on("message", function(msg) {
+	if (msg.content == '.user_cooldown') {
+		bot.sendMessage(msg, JSON.stringify(user_cooldown))
+	}
 	if (msg.content.startsWith(prefix)) {
 		var base = msg.content.substr(prefix.length)
 		var stub = base.split(' ')
@@ -53,37 +57,47 @@ bot.on("message", function(msg) {
 		name = name.toLowerCase()
 		var suffix = base.substr(stub[0].length + 1)
 		try {
-			if (cmd.execute[name]) {
-				if (cmd.execute[name].master == true && msg.author.id == config.acces.master) {
-					cmd.execute[name].fn(bot, msg, suffix)
-					log(cmd.execute[name].name, msg.author.name, msg.author.id, msg.author.discriminator)
-				}
-				else if (cmd.execute[name].admin == true) {
-					if (msg.server.roles.get('name', 'bobby commander')) {
-						if (msg.author.id == msg.server.owner.id || bot.memberHasRole(msg.author.id, msg.server.roles.get('name', 'bobby commander'))) {
-							cmd.execute[name].fn(bot, msg, suffix)
-							log(cmd.execute[name].name, msg.author.name, msg.author.id, msg.author.discriminator)
+			if (blacklist[msg.author.id]) {
+				console.log(log_time() + log_warn + '[' + msg.author.name + '#' + msg.author.discriminator + ' | ' + msg.author.id + '] Is blacklisted and tried to use the command: <' + name + '>' )
+			}
+			else {
+				if (cmd.execute[name]) {
+					if (cmd.execute[name].master == true && msg.author.id == config.acces.master) {
+						cmd.execute[name].fn(bot, msg, suffix)
+						log(cmd.execute[name].name, msg.author.name, msg.author.id, msg.author.discriminator)
+					}
+					else if (cmd.execute[name].admin == true) {
+						if (msg.server.roles.get('name', 'bobby commander')) {
+							if (msg.author.id == msg.server.owner.id || bot.memberHasRole(msg.author.id, msg.server.roles.get('name', 'bobby commander'))) {
+								cmd.execute[name].fn(bot, msg, suffix)
+								log(cmd.execute[name].name, msg.author.name, msg.author.id, msg.author.discriminator)
+							}
+							else {
+								bot.sendMessage(msg, 'I am sorry, but you dont have acces to this command!')
+								console.log(log_time() + log_warn + '[' + msg.author.name + '#' + msg.author.discriminator + ' | ' + msg.author.id + '] tried to use the ADMIN command: <' + cmd.execute[name].name + '>')
+							}
 						}
 						else {
-							bot.sendMessage(msg, 'I am sorry, but you dont have acces to this command!')
-							console.log(log_time() + log_warn + '[' + msg.author.name + '#' + msg.author.discriminator + ' | ' + msg.author.id + '] tried to use the ADMIN command: <' + cmd.execute[name].name + '>')
+							bot.sendMessage(msg, 'I am sorry but if you want to be able to use this command there should be a role in the server called: `bobby controller` (CASE SENSITIVE)')
 						}
 					}
-					else {
-						bot.sendMessage(msg, 'I am sorry but if you want to be able to use this command there should be a role in the server called: `bobby controller` (CASE SENSITIVE!)')
-					}
-				}
-				else if (cmd.execute[name].admin == false && cmd.execute[name].master == false) {
-					if (user_cooldown[msg.author.id]) {
-						if (user_cooldown[msg.author.id][name]) {
-							if (user_cooldown[msg.author.id][name].cooldown < new Date()) {
+					else if (cmd.execute[name].admin == false && cmd.execute[name].master == false) {
+						if (user_cooldown[msg.author.id]) {
+							if (user_cooldown[msg.author.id][name]) {
+								if (user_cooldown[msg.author.id][name].cooldown < new Date()) {
+									cmd.execute[name].fn(bot, msg, suffix)
+									log(cmd.execute[name].name, msg.author.name, msg.author.id, msg.author.discriminator)
+									cooldown(new Date(), msg.author, cmd.execute[name].cooldown, name)
+								}
+								else {
+									var wait_sec = (user_cooldown[msg.author.id][name].cooldown - new Date()) / 1000
+									bot.sendMessage(msg, 'Oh ooh! It seems like you are trying to use this command to fast! You need to wait another `' + wait_sec + '` seconds!')
+								}
+							}
+							else {
 								cmd.execute[name].fn(bot, msg, suffix)
 								log(cmd.execute[name].name, msg.author.name, msg.author.id, msg.author.discriminator)
 								cooldown(new Date(), msg.author, cmd.execute[name].cooldown, name)
-							}
-							else {
-								var wait_sec = (user_cooldown[msg.author.id][name].cooldown - new Date()) / 1000
-								bot.sendMessage(msg, 'Oh ooh! It seems like you are trying to use commands to fast! You need to wait another `' + wait_sec + '` seconds!')
 							}
 						}
 						else {
@@ -93,14 +107,9 @@ bot.on("message", function(msg) {
 						}
 					}
 					else {
-						cmd.execute[name].fn(bot, msg, suffix)
-						log(cmd.execute[name].name, msg.author.name, msg.author.id, msg.author.discriminator)
-						cooldown(new Date(), msg.author, cmd.execute[name].cooldown, name)
+						bot.sendMessage(msg, 'I am sorry, but you dont have acces to this command!')
+						console.log(log_time() + log_warn + '[' + msg.author.name + '#' + msg.author.discriminator + ' | ' + msg.author.id + '] tried to use the MASTER command: <' + cmd.execute[name].name + '>')
 					}
-				}
-				else {
-					bot.sendMessage(msg, 'I am sorry, but you dont have acces to this command!')
-					console.log(log_time() + log_warn + '[' + msg.author.name + '#' + msg.author.discriminator + ' | ' + msg.author.id + '] tried to use the MASTER command: <' + cmd.execute[name].name + '>')
 				}
 			}
 		}
