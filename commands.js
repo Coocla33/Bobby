@@ -1,8 +1,10 @@
 var config = require('./data/config.json')
 var tags = require('./data/tags.json')
+var blacklist = require('./data/blacklist.json')
 var fs = require('fs')
 var chalk = require('chalk')
 var zelakapi = require('zelak_api')
+var math = require('mathjs')
 
 var prefix = config.misc.prefix
 var log_error = chalk.bold.red('ERROR: ')
@@ -21,7 +23,7 @@ var cmds = {
 		'usage': '<>',
 		'master': true,
 		'admin': false,
-		'cooldown': 3000,
+		'cooldown': 5000,
 		fn: function(bot, msg, suffix) {
 			bot.sendMessage(msg, 'Template')
 		}
@@ -32,7 +34,7 @@ var cmds = {
 		'usage': '<master>',
 		'master': true,
 		'admin': false,
-		'cooldown': 3000,
+		'cooldown': 5000,
 		fn: function(bot, msg, suffix) {
 			bot.sendMessage(msg, 'You are a master!')
 		}
@@ -56,10 +58,12 @@ var cmds = {
 				messageArray.push(getCommandsMaster())
 				messageArray.push('')
 			}
-			if (msg.author.id == msg.server.owner.id) {
-				messageArray.push('Admin Commands:')
-				messageArray.push(getCommandsAdmin())
-				messageArray.push('')
+			if (msg.server.roles.get('name', 'bobby commander')) {
+				if (msg.author.id == msg.server.owner.id || bot.memberHasRole(msg.author.id, msg.server.roles.get('name', 'bobby commander'))) {
+					messageArray.push('Admin Commands:')
+					messageArray.push(getCommandsAdmin())
+					messageArray.push('')
+				}
 			}
 			messageArray.push('For more help on the commands do `' + prefix + 'help [command_name]`!')
 			bot.sendMessage(msg, messageArray)
@@ -99,6 +103,12 @@ var cmds = {
 			messageArray.push('Well i use Discord.js!')
 			messageArray.push('I am scripted in NodeJS.')
 			messageArray.push('My creator is Coocla33!')
+			messageArray.push('')
+			messageArray.push('**How to setup Admin commands**')
+			messageArray.push('To use admin commands the server must have a role called: `bobby commander` (CASE SENSITIVE)')
+			messageArray.push('When this role is added to the server everybody with this role and the creator of the server will have acces to admin commands.')
+			messageArray.push('To see all the Admin commands just use the command `' + prefix + 'commands`. this will autmaticly change depending on what commands you can use!')
+			bot.sendMessage(msg, messageArray)
 		}
 	},
 	botinfo: {
@@ -124,7 +134,7 @@ var cmds = {
 		'usage': '<tag [create, list, info, tag_name] [tag_name] [tag_content]>',
 		'master': false,
 		'admin': false,
-		'cooldown': 3000,
+		'cooldown': 5000,
 		fn: function(bot, msg, suffix) {
 			var messageArray = []
 			var args1 = suffix.toLowerCase().split(' ')[0]
@@ -240,7 +250,7 @@ var cmds = {
 		'usage': '<serverlist>',
 		'master': true,
 		'admin': false,
-		'cooldown': 3000,
+		'cooldown': 5000,
 		fn: function(bot, msg, suffix) {
 			bot.sendMessage(msg, '`(' + bot.servers.length + ')` | `' + bot.servers.map(server => server.name).join('`, `') + '`')
 		}
@@ -255,25 +265,13 @@ var cmds = {
 		fn: function(bot, msg, suffix) {
 			var messageArray = []
 			if (suffix) {
-				if (suffix.replace(/[^-()\d/*+.]/g, '')) {
-					var formula = suffix.replace(/[^-()\d/*+.]/g, '')
-					try {
-						if (formula == '9+10') {
-							messageArray.push('This was the formula you wanted a answer to: `' + formula + '`')
-							messageArray.push('This is the answer: `21`')
-						}
-						else {
-							messageArray.push('This was the formula you wanted a answer to: `' + formula + '`')
-							messageArray.push('This is the answer: `' + eval(formula) + '`')
-						}
-						bot.sendMessage(msg, messageArray)
-					}
-					catch (err) {
-						bot.sendMessage(msg, 'Oops! Something went wrong! Are you sure you put in a right formula?')
-					}
+				try {
+					messageArray.push('This was your forumla : `' + suffix + '`')
+					messageArray.push('This is your answer : `' + math.eval(suffix) + '`')
+					bot.sendMessage(msg, messageArray)
 				}
-				else {
-					bot.sendMessage(msg, 'Oops! Something went wrong! Are you sure you put in a right formula?')
+				catch (err) {
+					bot.sendMessage(msg, 'Oh ooh! Something went wrong! Are you sure this is a valid formula?')
 				}
 			}
 			else {
@@ -287,7 +285,7 @@ var cmds = {
 		'usage': '<userinfo [mention]>',
 		'master': false,
 		'admin': false,
-		'cooldown': 3000,
+		'cooldown': 10000,
 		fn: function(bot, msg, suffix) {
 			var messageArray = []
 			if (msg.mentions.length > 0) {
@@ -300,8 +298,8 @@ var cmds = {
 				messageArray.push('Discrim  : ' + msg.mentions[0].discriminator)
 				messageArray.push('Id       : ' + msg.mentions[0].id)
 				messageArray.push('Status   : ' + msg.mentions[0].status)
-				if (msg.mentions[0].game.name == null) {
-					messageArray.push('Playing  : This use is not playing anything')
+				if (msg.mentions[0].game == null) {
+					messageArray.push('Playing  : This user is not playing anything')
 				}
 				else {
 					messageArray.push('Playing  : ' + msg.mentions[0].game.name)
@@ -341,7 +339,7 @@ var cmds = {
 		'usage': '<getinvite [server_name]>',
 		'master': true,
 		'admin': false,
-		'cooldown': 3000,
+		'cooldown': 5000,
 		fn: function(bot, msg, suffix) {
 			zelakapi.getServerInvite(suffix, function(err, resp) {
 				if (err) {
@@ -357,7 +355,7 @@ var cmds = {
 		'usage': '<zelak_api>',
 		'master': true,
 		'admin': false,
-		'cooldown': 3000,
+		'cooldown': 5000,
 		fn: function(bot, msg, suffix) {
 			zelakapi.sendServersInvite(bot.servers, bot, function(err, status) {
 				if (err) {
@@ -373,7 +371,7 @@ var cmds = {
 		'usage': '<serverinfo>',
 		'master': false,
 		'admin': false,
-		'cooldown': 3000,
+		'cooldown': 10000,
 		fn: function(bot, msg, suffix) {
 			var date = function() {
 				var dn = new Date(msg.server.createdAt)
@@ -401,7 +399,7 @@ var cmds = {
 		'usage': '<inrole [role_name]>',
 		'master': false,
 		'admin': true,
-		'cooldown': 3000,
+		'cooldown': 5000,
 		fn: function(bot, msg, suffix) {
 			if (suffix) {
 				var name = suffix
@@ -419,6 +417,80 @@ var cmds = {
 				bot.sendMessage(msg, 'You should mention a role first! Use the command like this: `' + prefix + 'inrole example role`')
 			}
 		}
+	},
+	blacklistadd: {
+		'name': 'blacklistadd',
+		'desc': 'This command adds people to the blacklist!',
+		'usage': '<blacklistadd [user_mention]>',
+		'master': true,
+		'admin': false,
+		'cooldown': 5000,
+		fn: function(bot, msg, suffix) {
+			if (msg.mentions.length > 0) {
+				blacklist[msg.mentions[0].id] = {'date': new Date(), 'name': msg.mentions[0].name}
+				fs.writeFile("./data/blacklist.json", JSON.stringify(blacklist, null, 4), function(err){
+	          	if (err) { console.log(log_time() + log_error + err) }
+	            })
+				bot.sendMessage(msg, 'Blacklisted **' + msg.mentions[0].name + '**!')
+			}
+			else {
+				bot.sendMessage(msg, 'You need to mention a person before you can blacklist them!')
+			}
+		}
+	},
+	blacklistremove: {
+		'name': 'blacklistremove',
+		'desc': 'This command removes people from the blacklist!',
+		'usage': '<blacklistremove [user_mention]>',
+		'master': true,
+		'admin': false,
+		'cooldown': 5000,
+		fn: function(bot, msg, suffix) {
+			if (msg.mentions.length > 0) {
+				if (blacklist[msg.mentions[0].id]) {
+					delete blacklist[msg.mentions[0].id]
+					fs.writeFile("./data/blacklist.json", JSON.stringify(blacklist, null, 4), function(err){
+	          	 	if (err) {
+	          			console.log(log_time() + log_error + err) }
+	            	})
+	            	bot.sendMessage(msg, 'Un-Blacklisted **' + msg.mentions[0].name + '**!')
+				}
+				else {
+					bot.sendMessage(msg, 'This person is not in the blacklist! So you can not blacklist him!')
+				}
+			}
+			else {
+				bot.sendMessage(msg, 'You need to mention a person before you can blacklist them!')
+			}
+		}
+	},
+	blacklist: {
+		'name': 'blacklist',
+		'desc': 'This command shows all the naughty people!',
+		'usage': '<blacklist>',
+		'master': false,
+		'admin': false,
+		'cooldown': 5000,
+		fn: function(bot, msg, suffix) {
+			bot.sendMessage(msg, getBlacklist())
+		}
+	}
+}
+
+function getBlacklist() {
+	var blacklistArray = []
+	var ready = false
+	for (var id in blacklist) {
+		if (blacklist[id]) {
+			blacklistArray.push(blacklist[id].name)
+			ready = true
+		}
+	}
+	if (ready == true) {
+		return '**' + blacklistArray.sort().join('**\n**') + '**'
+	}
+	else {
+		return 'There are no people in the blacklist!'
 	}
 }
 
