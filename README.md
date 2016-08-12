@@ -1,4 +1,4 @@
-# Bobby V0.5.2
+# Bobby V0.6.1
 This is **Bobby**,
 **Bobby** is a Discord bot that i am working on.
 The prefix of **Bobby** is **.**
