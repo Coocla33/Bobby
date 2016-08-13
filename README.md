@@ -4,7 +4,7 @@ This is **Bobby**,
 The prefix of **Bobby** is **.**
 
 ## Commands
-- Main Commands
+- **Main Commands**
   - BotInfo
   - Calc
   - Commands
@@ -14,9 +14,9 @@ The prefix of **Bobby** is **.**
   - Tag
   - UserInfo
   - Blacklist
-- Admin Commands
+- **Admin Commands**
   - InRole
-- Master Commands (Only available to the Master user!)
+- **Master Commands** (*Only available to the Master user!*)
   - GetInvite
   - Master
   - ServerList
